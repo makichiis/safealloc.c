@@ -1,0 +1,3 @@
+- [ ] Write an alloc function that takes an allocator callback, and a 
+      mirroring free function that takes an allocator free callback.
+- [ ] Write a test script.
