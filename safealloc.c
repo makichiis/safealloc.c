@@ -45,12 +45,18 @@ int s__u64log10(uint64_t x) {
     return r;
 }
 
-const char* s__ulltoa(unsigned long long i) {
-    static char buf[24] = {};
+struct s__u64toabuf {
+    char bytes[28];
+    int len;
+};
+
+struct s__u64toabuf s__u64toa(uint64_t i) {
+    struct s__u64toabuf buf = {};
     int bw_it = s__u64log10((uint64_t)i) + 1;
+    buf.len = bw_it;
 
     while (bw_it > 0) {
-        buf[--bw_it] = (char)(i % 10) + '0';
+        buf.bytes[--bw_it] = (char)(i % 10) + '0';
         i /= 10;
     }
 
@@ -64,12 +70,11 @@ void* safealloc(size_t nmemb, size_t size) {
     void* mem = calloc(nmemb, size);
 
     if (!mem) {
-        unsigned long long bytes = nmemb * size;
-        const char* bs = s__ulltoa(bytes);
-        int bslen = s__u64log10(bytes) + 2;
+        uint64_t bytes = ((uint64_t)nmemb) * size;
+        struct s__u64toabuf u64str = s__u64toa(bytes);
 
         write(fileno(stderr), CWSTR("Failed to allocate "));
-        write(fileno(stderr), bs, bslen);
+        write(fileno(stderr), u64str.bytes, u64str.len);
         write(fileno(stderr), CWSTR(" bytes in " __FILE__ "\n"));
     }
 
